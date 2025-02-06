@@ -69,30 +69,20 @@
                         <h2 class="card-title text-center mb-4">Change Password</h2>
                         <form>
                             <div class="mb-3">
-                                <label for="current-password" class="form-label">Current Password</label>
+                                <label for="password" class="form-label">New Password</label>
                                 <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
                                     <span class="input-group-text bg-light">
-                                        <i class="fas fa-lock"></i>
+                                        <i class="fas fa-eye toggle-password" onclick="togglePassword('password')"></i>
                                     </span>
-                                    <input type="password" class="form-control" id="current-password" required>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="new-password" class="form-label">New Password</label>
+                                <label for="rpassword" class="form-label">Repeat Password</label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light">
-                                        <i class="fas fa-key"></i>
-                                    </span>
-                                    <input type="password" class="form-control" id="new-password" required>
-                                </div>
-                            </div>
-                            <div class="mb-4">
-                                <label for="confirm-password" class="form-label">Confirm New Password</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light">
-                                        <i class="fas fa-check-double"></i>
-                                    </span>
-                                    <input type="password" class="form-control" id="confirm-password" required>
+                                    <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="rpassword" name="rpassword" placeholder="Repeat password" required>
                                 </div>
                             </div>
                             <div class="d-grid">
@@ -106,7 +96,12 @@
             </div>
         </div>
     </div>
-
+    <script>
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            field.type = field.type === "password" ? "text" : "password";
+        }
+    </script>
     <?php include "./templates/footer.php"; ?>
 
 

@@ -23,17 +23,11 @@
         $phone = pg_escape_string($_POST['phone']);
         $dob = pg_escape_string($_POST['dob']);
         $salary = (float)$_POST['salary'];
-        $password = $_POST['password'];
-        $rpassword = $_POST['rpassword'];
         $position_id = (int)$_POST['position'];
         $department_id = (int)$_POST['department'];
         $emp_details = pg_escape_string($_POST['emp_details']);
         $skills = pg_escape_string($_POST['skills']);
         $status = 'f';
-
-        if ($password !== $rpassword) {
-            $error = "Passwords do not match.";
-        }
 
         if (empty($error)) {
             $hashed_password = password_hash($password, PASSWORD_BCRYPT);
@@ -46,7 +40,6 @@
                 $profile_image = pg_escape_string($target_file);
             }
 
-            // Insert into 'employees' table
             $insert_employee_query = "
             INSERT INTO employees (
             user_type_id, department_id, position_id, employee_name, employee_email, employee_phone, salary, profile_image, employee_details, employee_skils, dob, status
@@ -71,17 +64,15 @@
             if ($insert_employee) {
                 $employee_id = pg_fetch_result($insert_employee, 0, 'employee_id');
 
-                // Insert into 'users' table
                 $insert_user_query =
                     "INSERT INTO users (
-                    employee_id, user_type_id, full_name, username, password, status
+                    employee_id, user_type_id, full_name, username, status
                 ) 
                 VALUES (
                     $employee_id,
                     1,
                     '$fullname', 
                     '$email', 
-                    '$hashed_password', 
                     'f'
                 );";
 
@@ -89,7 +80,8 @@
                 $insert_user = pg_query($conn, $insert_user_query);
 
                 if ($insert_user) {
-                    echo "<script>alert('Registration successful! You can now login'); window.location.href='login.php';</script>";
+                    echo "<script>alert('Registration successful!'); window.location.href='login.php';</script>";
+                    header("location: verification-pending.php");
                     exit;
                 } else {
                     $error = "User registration failed.";
@@ -164,23 +156,6 @@
                                 <!-- Right Column -->
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="password" class="form-label">Password</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
-                                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
-                                            <span class="input-group-text bg-light">
-                                                <i class="fas fa-eye toggle-password" onclick="togglePassword('password')"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="rpassword" class="form-label">Repeat Password</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
-                                            <input type="password" class="form-control" id="rpassword" name="rpassword" placeholder="Repeat password" required>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
                                         <label for="position" class="form-label">Position</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light"><i class="fas fa-briefcase"></i></span>
@@ -214,7 +189,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="emp_details" class="form-label">Employee Details</label>
-                                        <textarea class="form-control" id="emp_details" name="emp_details" rows="3" placeholder="Write a short bio about yourself"></textarea>
+                                        <textarea class="form-control" id="emp_details" name="emp_details" rows="6" placeholder="Write a short bio about yourself"></textarea>
                                     </div>
                                     <div class="mb-3">
                                         <label for="skills" class="form-label">Skills</label>
