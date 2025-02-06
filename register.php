@@ -52,7 +52,7 @@
             user_type_id, department_id, position_id, employee_name, employee_email, employee_phone, salary, profile_image, employee_details, employee_skils, dob, status
         ) 
         VALUES (
-            1,
+            0,
             $department_id,
             $position_id,
             '$fullname', 
