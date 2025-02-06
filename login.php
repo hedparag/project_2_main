@@ -12,7 +12,33 @@
 
 <body class="d-flex flex-column min-vh-100">
     <?php include "./templates/header.php";
+    session_start();
+    include "./include/config.php";
     echo $navbarLogoutScr;
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+
+        // $query = "SELECT * FROM users WHERE username = $email;";
+        $query = "SELECT * FROM users WHERE username = '$email';";
+        $result = pg_query($conn, $query);
+
+        if ($result && pg_num_rows($result) > 0) {
+            $user = pg_fetch_assoc($result);
+
+            if (password_verify($password, $user["password"])) {
+                $_SESSION["username"] = $user["username"];
+                $_SESSION["employee_id"] = $user["employee_id"];
+                header("Location: index.php");
+                exit();
+            } else {
+                echo "<script>alert('❌ Incorrect password!')</script>";
+            }
+        } else {
+            echo "<script>alert('❌ User not found!')</script>";
+        }
+    }
     ?>
 
     <!-- Main Content -->
@@ -22,14 +48,14 @@
                 <div class="card shadow-lg">
                     <div class="card-body p-5">
                         <h1 class="text-center mb-4">Welcome Back</h1>
-                        <form action="dashboard.php" method="GET">
+                        <form method="POST">
                             <div class="mb-4">
                                 <label for="email" class="form-label">Email address</label>
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="fas fa-envelope"></i>
                                     </span>
-                                    <input type="email" class="form-control" id="email" required>
+                                    <input type="email" class="form-control" id="email" name="email" required>
                                 </div>
                             </div>
                             <div class="mb-4">
@@ -38,7 +64,7 @@
                                     <span class="input-group-text">
                                         <i class="fas fa-lock"></i>
                                     </span>
-                                    <input type="password" class="form-control" id="password" required>
+                                    <input type="password" class="form-control" id="password" name="password" required>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100 mb-3">
