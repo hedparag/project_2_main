@@ -12,7 +12,6 @@
 <body class="d-flex flex-column min-vh-100 bg-light">
     <?php include "./templates/header.php"; ?>
 
-    <!-- Main Content -->
     <div class="container flex-grow-1 py-5">
         <div class="row justify-content-center">
             <div class="col-lg-10">
