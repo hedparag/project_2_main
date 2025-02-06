@@ -10,7 +10,10 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100 bg-light">
-    <?php include "./templates/header.php"; ?>
+    <?php include "./templates/header.php";
+    echo $navbarUserScr;
+
+    ?>
 
     <!-- Main Content -->
     <div class="container flex-grow-1 py-5">

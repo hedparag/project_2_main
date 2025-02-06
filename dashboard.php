@@ -12,7 +12,10 @@
 
 <body class="d-flex flex-column min-vh-100">
 
-    <?php include "./templates/header.php"; ?>
+    <?php include "./templates/header.php";
+    echo $navbarAdminScr;
+
+    ?>
 
     <!-- Main Content -->
     <div class="container flex-grow-1 py-4">
