@@ -11,6 +11,100 @@
 
 <body class="d-flex flex-column min-vh-100 bg-light">
     <?php include "./templates/header.php"; ?>
+    <?php include "./include/config.php";
+
+    $error = '';
+    $fullname = $email = $phone = $dob = $salary = $position_id = $department_id = $emp_details = $skills = '';
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $fullname = pg_escape_string($_POST['fullname']);
+        $email = pg_escape_string($_POST['email']);
+        $phone = pg_escape_string($_POST['phone']);
+        $dob = pg_escape_string($_POST['dob']);
+        $salary = (float)$_POST['salary'];
+        $password = $_POST['password'];
+        $rpassword = $_POST['rpassword'];
+        $position_id = (int)$_POST['position'];
+        $department_id = (int)$_POST['department'];
+        $emp_details = pg_escape_string($_POST['emp_details']);
+        $skills = pg_escape_string($_POST['skills']);
+        $status = 'f';
+
+        if ($password !== $rpassword) {
+            $error = "Passwords do not match.";
+        }
+
+        if (empty($error)) {
+            $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+            $profile_image = null;
+            if (!empty($_FILES["profile_img"]["name"])) {
+                $target_dir = "uploads/";
+                $target_file = $target_dir . basename($_FILES["profile_img"]["name"]);
+                move_uploaded_file($_FILES["profile_img"]["tmp_name"], $target_file);
+                $profile_image = pg_escape_string($target_file);
+            }
+
+            // Insert into 'employees' table
+            $insert_employee_query = "
+            INSERT INTO employees (
+            user_type_id, department_id, position_id, employee_name, employee_email, employee_phone, salary, profile_image, employee_details, employee_skils, dob, status
+        ) 
+        VALUES (
+            1,
+            $department_id,
+            $position_id,
+            '$fullname', 
+            '$email', 
+            '$phone', 
+            $salary, 
+            '$profile_image', 
+            '$emp_details', 
+            '$skills', 
+            '$dob', 
+            'f'
+        ) RETURNING employee_id;";
+
+            $insert_employee = pg_query($conn, $insert_employee_query);
+
+            if ($insert_employee) {
+                $employee_id = pg_fetch_result($insert_employee, 0, 'employee_id');
+
+                // Insert into 'users' table
+                $insert_user_query =
+                    "INSERT INTO users (
+                    employee_id, user_type_id, full_name, username, password, status
+                ) 
+                VALUES (
+                    $employee_id,
+                    1,
+                    '$fullname', 
+                    '$email', 
+                    '$hashed_password', 
+                    'f'
+                );";
+
+
+                $insert_user = pg_query($conn, $insert_user_query);
+
+                if ($insert_user) {
+                    echo "<script>alert('Registration successful! You can now login'); window.location.href='login.php';</script>";
+                    exit;
+                } else {
+                    $error = "User registration failed.";
+                }
+            } else {
+                $error = "Employee registration failed.";
+            }
+        }
+    }
+
+    if (!empty($error)) {
+        echo "<script>alert('$error'); window.location.href='register.php';</script>";
+    }
+
+    ?>
+
 
     <div class="container flex-grow-1 py-5">
         <div class="row justify-content-center">
@@ -25,135 +119,112 @@
                                     <div class="mb-3">
                                         <label for="fullname" class="form-label">Full Name</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="fas fa-user"></i>
-                                            </span>
-                                            <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Full Name" required>
+                                            <span class="input-group-text bg-light"><i class="fas fa-user"></i></span>
+                                            <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Enter your full name" required>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="email" class="form-label">E-Mail</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="fas fa-envelope"></i>
-                                            </span>
-                                            <input type="email" class="form-control" id="email" name="email" placeholder="E-Mail" required>
+                                            <span class="input-group-text bg-light"><i class="fas fa-envelope"></i></span>
+                                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email address" required>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="phone" class="form-label">Mobile Number</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="fas fa-phone"></i>
-                                            </span>
-                                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="Mobile Number" required>
+                                            <span class="input-group-text bg-light"><i class="fas fa-phone"></i></span>
+                                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter your mobile number" required>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="dob" class="form-label">Date of Birth</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="fas fa-calendar"></i>
-                                            </span>
+                                            <span class="input-group-text bg-light"><i class="fas fa-calendar"></i></span>
                                             <input type="date" class="form-control" id="dob" name="dob" required>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="salary" class="form-label">Salary</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="fas fa-dollar-sign"></i>
-                                            </span>
-                                            <input type="text" class="form-control" id="salary" name="salary" placeholder="Salary per annum" required>
+                                            <span class="input-group-text bg-light"><i class="fas fa-dollar-sign"></i></span>
+                                            <input type="number" class="form-control" id="salary" name="salary" placeholder="Enter your salary in INR" required>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="profile_img" class="form-label">Profile Picture</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="fas fa-image"></i>
-                                            </span>
-                                            <input type="file" class="form-control" id="profile_img" name="profile_img" required>
+                                            <span class="input-group-text bg-light"><i class="fas fa-image"></i></span>
+                                            <input type="file" class="form-control" id="profile_img" name="profile_img" accept="image/*" required>
                                         </div>
                                     </div>
                                 </div>
+
                                 <!-- Right Column -->
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="password" class="form-label">Password</label>
                                         <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
+                                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
                                             <span class="input-group-text bg-light">
-                                                <i class="fas fa-lock"></i>
+                                                <i class="fas fa-eye toggle-password" onclick="togglePassword('password')"></i>
                                             </span>
-                                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="rpassword" class="form-label">Repeat Password</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="fas fa-lock"></i>
-                                            </span>
-                                            <input type="password" class="form-control" id="rpassword" name="rpassword" placeholder="Repeat Password" required>
+                                            <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
+                                            <input type="password" class="form-control" id="rpassword" name="rpassword" placeholder="Repeat password" required>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="position" class="form-label">Position</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="fas fa-briefcase"></i>
-                                            </span>
+                                            <span class="input-group-text bg-light"><i class="fas fa-briefcase"></i></span>
                                             <select class="form-select" id="position" name="position" required>
-                                                <option value="" disabled selected>Select Position</option>
-                                                <option value="Director">Director</option>
-                                                <option value="Manager">Manager</option>
-                                                <option value="Team Leader">Team Leader</option>
-                                                <option value="Senior Specialist">Senior Specialist</option>
-                                                <option value="Specialist">Specialist</option>
-                                                <option value="Associate">Associate</option>
-                                                <option value="Analyst">Analyst</option>
-                                                <option value="Coordinator">Coordinator</option>
-                                                <option value="Intern">Intern</option>
+                                                <option value="">-- Select Position --</option>
+                                                <?php
+                                                $query1 = "SELECT * FROM positions WHERE status = 't'";
+                                                $result = pg_query($conn, $query1);
+                                                while ($data = pg_fetch_assoc($result)) {
+                                                    echo "<option value='{$data['position_id']}'>{$data['position_name']}</option>";
+                                                }
+                                                ?>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="department" class="form-label">Department</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="fas fa-building"></i>
-                                            </span>
+                                            <span class="input-group-text bg-light"><i class="fas fa-building"></i></span>
                                             <select class="form-select" id="department" name="department" required>
                                                 <option value="">-- Select Department --</option>
+                                                <?php
+                                                $query1 = "SELECT * FROM departments WHERE status = 't'";
+                                                $result = pg_query($conn, $query1);
+                                                while ($data = pg_fetch_assoc($result)) {
+                                                    echo "<option value='{$data['department_id']}'>{$data['department_name']}</option>";
+                                                }
+                                                ?>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="emp_details" class="form-label">Employee Details</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="fas fa-info-circle"></i>
-                                            </span>
-                                            <textarea class="form-control" id="emp_details" name="emp_details" rows="3" placeholder="Write about you in short"></textarea>
-                                        </div>
+                                        <textarea class="form-control" id="emp_details" name="emp_details" rows="3" placeholder="Write a short bio about yourself"></textarea>
                                     </div>
                                     <div class="mb-3">
                                         <label for="skills" class="form-label">Skills</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="fas fa-tools"></i>
-                                            </span>
-                                            <textarea class="form-control" id="skills" name="skills" rows="3" placeholder="Skills separated by comma"></textarea>
-                                        </div>
+                                        <textarea class="form-control" id="skills" name="skills" rows="3" placeholder="Enter skills separated by commas"></textarea>
                                     </div>
                                 </div>
                             </div>
                             <div class="row mt-4">
                                 <div class="col-12">
                                     <div class="d-grid">
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-user-plus me-1"></i>Register
-                                        </button>
+                                        <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus me-1"></i> Register</button>
                                     </div>
                                     <p class="text-center mt-3 mb-0">
                                         Already have an account? <a href="index.html" class="text-decoration-none">Login here</a>
@@ -161,6 +232,14 @@
                                 </div>
                             </div>
                         </form>
+
+                        <script>
+                            function togglePassword(fieldId) {
+                                const field = document.getElementById(fieldId);
+                                field.type = field.type === "password" ? "text" : "password";
+                            }
+                        </script>
+
                     </div>
                 </div>
             </div>
