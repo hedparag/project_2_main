@@ -12,7 +12,10 @@
 <body class="d-flex flex-column min-vh-100 bg-light">
     <?php include "./templates/header.php"; ?>
     <?php include "./include/config.php";
-
+    if (isset($_SESSION["user_type_id"])) {
+        header("location: index.php");
+        exit();
+    }
     $error = '';
     $fullname = $email = $phone = $dob = $salary = $position_id = $department_id = $emp_details = $skills = '';
 

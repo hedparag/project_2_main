@@ -11,6 +11,33 @@
 
 <body class="d-flex flex-column min-vh-100 bg-light">
     <?php include "./templates/header.php";
+    include "./include/config.php";
+
+    if (!isset($_SESSION["user_type_id"])) {
+        header("location: login.php");
+        exit();
+    }
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $fullname = $_POST['fullname'];
+        $email = trim($_POST['email']);
+        $position = $_POST['position'];
+
+        $query = "UPDATE users SET fullname = $1, username = $2 WHERE username = $3";
+        $result = pg_query_params($conn, $query, [$fullname, $email, $_SESSION["employee_email"]]);
+
+        if ($result !== false) {  // Check if the query executed successfully
+            $affected_rows = pg_affected_rows($conn); // Get affected rows
+
+            if ($affected_rows > 0) {
+                echo "<script>alert('✅ User details updated successfully!')</script>";
+            } else {
+                echo "<script>alert('⚠️ No changes made. User not found or same data provided')</script>";
+            }
+        } else {
+            echo "<script>alert('❌ Update failed')</script>";
+        }
+    }
 
     ?>
 
@@ -30,7 +57,7 @@
                                         <i class="fas fa-user"></i>
                                     </span>
                                     <input type="text" class="form-control" id="fullname" name="fullname"
-                                        value="John Doe" required>
+                                        value=<?php echo $_SESSION["employee_name"] ?> required>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -40,7 +67,7 @@
                                         <i class="fas fa-envelope"></i>
                                     </span>
                                     <input type="email" class="form-control" id="email" name="email"
-                                        value="john@example.com" required>
+                                        value=<?php echo $_SESSION["employee_email"] ?> required>
                                 </div>
                             </div>
                             <div class="mb-4">
@@ -50,7 +77,7 @@
                                         <i class="fas fa-briefcase"></i>
                                     </span>
                                     <input type="text" class="form-control" id="position" name="position"
-                                        value="Developer" required>
+                                        value=<?php echo $_SESSION["position_name"] ?> required>
                                 </div>
                             </div>
                             <div class="d-grid">

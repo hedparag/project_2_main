@@ -42,7 +42,7 @@ session_start();
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                <a class="dropdown-item" href="profile.html">
+                                <a class="dropdown-item" href="profile.php">
                                     <i class="fas fa-user me-2"></i>Profile
                                 </a>
                             </li>
@@ -80,7 +80,7 @@ session_start();
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li>
-                                <a class="dropdown-item" href="profile.html">
+                                <a class="dropdown-item" href="profile.php">
                                     <i class="fas fa-user me-2"></i>Profile
                                 </a>
                             </li>

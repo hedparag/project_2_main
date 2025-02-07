@@ -13,7 +13,10 @@
 <body class="d-flex flex-column min-vh-100">
 
     <?php include "./templates/header.php";
-
+    if (!isset($_SESSION["user_type_id"]) || $_SESSION["user_type_id"] == 0) {
+        header("location: login.php");
+        exit();
+    }
     ?>
 
     <!-- Main Content -->

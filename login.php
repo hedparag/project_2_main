@@ -14,6 +14,11 @@
     <?php include "./templates/header.php";
     include "./include/config.php";
 
+    if (isset($_SESSION["user_type_id"])) {
+        header("location: index.php");
+        exit();
+    }
+
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = trim($_POST['email']);
         $password = $_POST['password'];
@@ -32,6 +37,7 @@
                     $employee = pg_fetch_assoc($eresult);
                     $_SESSION["employee_name"] = $employee["employee_name"];
                     $_SESSION["user_type_id"] = $employee["user_type_id"];
+                    $_SESSION["employee_email"] = $employee["employee_email"];
 
                     $dquery = "SELECT department_name FROM departments WHERE department_id = $1";
                     $dresult = pg_query_params($conn, $dquery, [$employee["department_id"]]);
