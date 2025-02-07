@@ -20,7 +20,6 @@
         $email = $_POST['email'];
         $password = $_POST['password'];
 
-        // $query = "SELECT * FROM users WHERE username = $email;";
         $query = "SELECT * FROM users WHERE username = '$email';";
         $result = pg_query($conn, $query);
 
@@ -28,8 +27,26 @@
             $user = pg_fetch_assoc($result);
 
             if (password_verify($password, $user["password"])) {
-                $_SESSION["username"] = $user["username"];
-                $_SESSION["employee_id"] = $user["employee_id"];
+                // i am fetching the employee name here
+                $equery = "SELECT * FROM employees WHERE employee_email = '$email';";
+                $eresult = pg_query($conn, $equery);
+                $employee = pg_fetch_assoc($eresult);
+                $_SESSION["employee_name"] = $employee["employee_name"];
+
+                // i am fetching the department name here
+                $department_id = $employee["department_id"];
+                $dquery = "SELECT department_name FROM departments WHERE department_id = '$department_id';";
+                $dresult = pg_query($conn, $dquery);
+                $department = pg_fetch_assoc($dresult);
+                $_SESSION["department_name"] = $department["department_name"];
+
+                // i am fetching the position name here
+                $position_id = $employee["position_id"];
+                $pquery = "SELECT position_name FROM positions WHERE position_id = '$position_id';";
+                $dresult = pg_query($conn, $pquery);
+                $position = pg_fetch_assoc($dresult);
+                $_SESSION["position_name"] = $position["position_name"];
+
                 header("Location: index.php");
                 exit();
             } else {
