@@ -12,7 +12,6 @@
 <body class="d-flex flex-column min-vh-100 bg-light">
     <?php include "./templates/header.php"; ?>
     <?php include "./include/config.php";
-    echo $navbarLogoutScr;
 
     $error = '';
     $fullname = $email = $phone = $dob = $salary = $position_id = $department_id = $emp_details = $skills = '';

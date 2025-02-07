@@ -13,7 +13,6 @@
 <body class="d-flex flex-column min-vh-100">
 
     <?php include "./templates/header.php";
-    echo $navbarAdminScr;
 
     ?>
 

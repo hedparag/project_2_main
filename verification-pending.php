@@ -13,7 +13,6 @@
 
 <body class="bg-light d-flex flex-column min-vh-100">
     <?php include "./templates/header.php";
-    echo $navbarLogoutScr;
 
     ?>
 

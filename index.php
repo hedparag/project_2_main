@@ -14,6 +14,7 @@
 <body class="d-flex flex-column min-vh-100 bg-light">
     <?php
     include "./templates/header.php";
+    session_start();
     ?>
 
     <!-- Main Content -->

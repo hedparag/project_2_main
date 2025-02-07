@@ -14,7 +14,6 @@
     <?php include "./templates/header.php";
     session_start();
     include "./include/config.php";
-    echo $navbarLogoutScr;
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = trim($_POST['email']);
