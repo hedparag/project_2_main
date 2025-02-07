@@ -17,7 +17,6 @@
     }
     ?>
 
-
     <!-- Main Content -->
     <div class="container flex-grow-1 py-5">
         <div class="row justify-content-center">

@@ -57,7 +57,7 @@
                                         <i class="fas fa-user"></i>
                                     </span>
                                     <input type="text" class="form-control" id="fullname" name="fullname"
-                                        value=<?php echo $_SESSION["employee_name"] ?> required>
+                                        value='<?php echo $_SESSION["employee_name"] ?>'' required>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -67,7 +67,7 @@
                                         <i class="fas fa-envelope"></i>
                                     </span>
                                     <input type="email" class="form-control" id="email" name="email"
-                                        value=<?php echo $_SESSION["employee_email"] ?> required>
+                                        value="<?php echo $_SESSION["employee_email"] ?>" required>
                                 </div>
                             </div>
                             <div class="mb-4">
@@ -100,7 +100,7 @@
                                     <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
                                     <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
                                     <span class="input-group-text bg-light">
-                                        <i class="fas fa-eye toggle-password" onclick="togglePassword('password')"></i>
+                                        <i class="fas fa-eye toggle-password" onclick="togglePassword(' password')"></i>
                                     </span>
                                 </div>
                             </div>
