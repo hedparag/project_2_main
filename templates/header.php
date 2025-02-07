@@ -50,7 +50,7 @@ session_start();
                                 <hr class="dropdown-divider">
                             </li>
                             <li>
-                                <a class="dropdown-item text-danger" href="index.html">
+                                <a class="dropdown-item text-danger" href="logout.php">
                                     <i class="fas fa-sign-out-alt me-2"></i>Logout
                                 </a>
                             </li>
@@ -88,7 +88,7 @@ session_start();
                                 <hr class="dropdown-divider">
                             </li>
                             <li>
-                                <a class="dropdown-item text-danger" href="index.html">
+                                <a class="dropdown-item text-danger" href="logout.php">
                                     <i class="fas fa-sign-out-alt me-2"></i>Logout
                                 </a>
                             </li>
