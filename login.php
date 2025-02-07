@@ -12,7 +12,6 @@
 
 <body class="d-flex flex-column min-vh-100">
     <?php include "./templates/header.php";
-    session_start();
     include "./include/config.php";
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
