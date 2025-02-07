@@ -17,38 +17,45 @@
     echo $navbarLogoutScr;
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $email = $_POST['email'];
+        $email = trim($_POST['email']);
         $password = $_POST['password'];
 
-        $query = "SELECT * FROM users WHERE username = '$email';";
-        $result = pg_query($conn, $query);
+        $query = "SELECT * FROM users WHERE username = $1";
+        $result = pg_query_params($conn, $query, [$email]);
 
         if ($result && pg_num_rows($result) > 0) {
             $user = pg_fetch_assoc($result);
 
             if (password_verify($password, $user["password"])) {
-                // i am fetching the employee name here
-                $equery = "SELECT * FROM employees WHERE employee_email = '$email';";
-                $eresult = pg_query($conn, $equery);
-                $employee = pg_fetch_assoc($eresult);
-                $_SESSION["employee_name"] = $employee["employee_name"];
+                $equery = "SELECT * FROM employees WHERE employee_email = $1";
+                $eresult = pg_query_params($conn, $equery, [$email]);
 
-                // i am fetching the department name here
-                $department_id = $employee["department_id"];
-                $dquery = "SELECT department_name FROM departments WHERE department_id = '$department_id';";
-                $dresult = pg_query($conn, $dquery);
-                $department = pg_fetch_assoc($dresult);
-                $_SESSION["department_name"] = $department["department_name"];
+                if ($eresult && pg_num_rows($eresult) > 0) {
+                    $employee = pg_fetch_assoc($eresult);
+                    $_SESSION["employee_name"] = $employee["employee_name"];
+                    $_SESSION["user_type_id"] = $employee["user_type_id"];
 
-                // i am fetching the position name here
-                $position_id = $employee["position_id"];
-                $pquery = "SELECT position_name FROM positions WHERE position_id = '$position_id';";
-                $dresult = pg_query($conn, $pquery);
-                $position = pg_fetch_assoc($dresult);
-                $_SESSION["position_name"] = $position["position_name"];
+                    $dquery = "SELECT department_name FROM departments WHERE department_id = $1";
+                    $dresult = pg_query_params($conn, $dquery, [$employee["department_id"]]);
 
-                header("Location: index.php");
-                exit();
+                    if ($dresult && pg_num_rows($dresult) > 0) {
+                        $department = pg_fetch_assoc($dresult);
+                        $_SESSION["department_name"] = $department["department_name"];
+                    }
+
+                    $pquery = "SELECT position_name FROM positions WHERE position_id = $1";
+                    $presult = pg_query_params($conn, $pquery, [$employee["position_id"]]);
+
+                    if ($presult && pg_num_rows($presult) > 0) {
+                        $position = pg_fetch_assoc($presult);
+                        $_SESSION["position_name"] = $position["position_name"];
+                    }
+
+                    header("Location: index.php");
+                    exit();
+                } else {
+                    echo "<script>alert('❌ Employee details not found!')</script>";
+                }
             } else {
                 echo "<script>alert('❌ Incorrect password!')</script>";
             }
@@ -56,6 +63,8 @@
             echo "<script>alert('❌ User not found!')</script>";
         }
     }
+
+
     ?>
 
     <!-- Main Content -->
