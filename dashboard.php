@@ -34,9 +34,9 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <div class="d-flex justify-content-between mb-3">
-                <button id="saveChangesBtn" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i> Save Table Changes</button>
+                <button id="addEmployeeBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Employee</button>
                 <div class="">
-                    <button id="addBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Employee</button>
+                    <button id="bulkApproveBtn" class="btn btn-success"><i class="fa-solid fa-check"></i> Approve Selected</button>
                     <button id="bulkRejectBtn" class="btn btn-danger"><i class="fa-solid fa-xmark"></i> Reject Selected</button>
                 </div>
             </div>
@@ -98,7 +98,7 @@
                                 <td>
                                     <button class="btn btn-sm <?= $row['status'] == 't' ? 'btn-danger' : 'btn-success'; ?> toggle-status-btn"
                                         data-id="<?= $row['employee_id']; ?>" data-status="<?= $row['status']; ?>">
-                                        <?= $row['status'] == 't' ? 'Reject' : 'Activate'; ?>
+                                        <?= $row['status'] == 't' ? 'Reject' : 'Approve'; ?>
                                     </button>
                                 </td>
                             </tr>
@@ -109,53 +109,7 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById("selectAll").addEventListener("change", function() {
-            let checkboxes = document.querySelectorAll(".userCheckbox");
-            checkboxes.forEach(cb => cb.checked = this.checked);
-        });
-
-        // Toggle User Status
-        document.querySelectorAll(".toggle-status-btn").forEach(button => {
-            button.addEventListener("click", function() {
-                let userId = this.getAttribute("data-id");
-                let newStatus = this.getAttribute("data-status") === 't' ? 'f' : 't';
-
-                fetch("toggle_status.php", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: `id=${userId}&status=${newStatus}`
-                    })
-                    .then(response => response.text())
-                    .then(data => location.reload());
-            });
-        });
-
-        // Bulk Reject Users
-        document.getElementById("bulkRejectBtn").addEventListener("click", function() {
-            let selectedIds = [];
-            document.querySelectorAll(".userCheckbox:checked").forEach(cb => selectedIds.push(cb.value));
-
-            if (selectedIds.length > 0) {
-                fetch("bulk_reject.php", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: `ids=${JSON.stringify(selectedIds)}`
-                    })
-                    .then(response => response.text())
-                    .then(data => location.reload());
-            }
-        });
-
-        // Save Table Changes (Placeholder)
-        document.getElementById("saveChangesBtn").addEventListener("click", function() {
-            alert("Table changes saved (Implement backend logic).");
-        });
-    </script>
+    <script src="./js/dashboard.js"></script>
 
     <?php include "./templates/footer.php"; ?>
 
