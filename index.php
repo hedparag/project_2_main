@@ -14,8 +14,6 @@
 <body class="d-flex flex-column min-vh-100 bg-light">
     <?php
     include "./templates/header.php";
-    echo $navbarUserScr;
-
     ?>
 
     <!-- Main Content -->
@@ -26,10 +24,10 @@
                 <div class="card border-0 bg-primary text-white shadow-sm">
                     <div class="card-body p-5">
                         <div class="d-flex align-items-center">
-                            <img src="https://ui-avatars.com/api/?name=John+Doe&size=128" class="rounded-circle me-4" width="100">
+                            <img src="https://ui-avatars.com/api/?name=<?php echo $_SESSION["employee_name"]; ?>&size=128" class="rounded-circle me-4" width="100">
                             <div>
-                                <h1 class="display-6 mb-1">Welcome back, John Doe!</h1>
-                                <p class="lead mb-0">Senior Developer • IT Department</p>
+                                <h1 class="display-6 mb-1">Welcome back, <?php echo $_SESSION["employee_name"]; ?>!</h1>
+                                <p class="lead mb-0"> <?php echo $_SESSION["department_name"] . " • " . $_SESSION["position_name"]; ?></p>
                             </div>
                         </div>
                     </div>
