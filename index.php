@@ -111,7 +111,7 @@
                         <h5 class="card-title mb-4">Quick Actions</h5>
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <a href="profile.html" class="btn btn-light border w-100 p-4 text-start">
+                                <a href="profile.php" class="btn btn-light border w-100 p-4 text-start">
                                     <i class="fas fa-user-edit fa-2x mb-3 text-primary"></i>
                                     <h6 class="mb-1">Update Profile</h6>
                                     <small class="text-muted">Edit your personal information</small>
