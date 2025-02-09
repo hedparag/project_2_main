@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center;">
     <?php include "./templates/header.php";
     include "./include/config.php";
 
@@ -72,7 +72,7 @@
     ?>
 
     <!-- Main Content -->
-    <div class="container flex-grow-1 d-flex align-items-center py-5">
+    <div class=" container flex-grow-1 d-flex align-items-center py-5">
         <div class="row w-100 justify-content-center">
             <div class="col-md-6 col-lg-5">
                 <div class="card shadow-lg">

@@ -9,8 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
-<body class="d-flex flex-column min-vh-100 bg-light">
-    <?php include "./templates/header.php";
+<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center;">    <?php include "./templates/header.php";
     if (!isset($_SESSION["user_type_id"]) || $_SESSION["user_type_id"] == 0) {
         header("location: login.php");
         exit();
