@@ -33,7 +33,7 @@
         ?>
 
         <!-- Main Content -->
-        <div class="card shadow-sm">
+        <div class="card" style="background-color: transparent;">
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-3">
                     <a href="add_employee.php"><button id="addEmployeeBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Employee</button></a>
