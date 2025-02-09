@@ -38,6 +38,7 @@
                     $_SESSION["employee_name"] = $employee["employee_name"];
                     $_SESSION["user_type_id"] = $employee["user_type_id"];
                     $_SESSION["employee_email"] = $employee["employee_email"];
+                    $_SESSION["profile_image"] = $employee["profile_image"];
 
                     $dquery = "SELECT department_name FROM departments WHERE department_id = $1";
                     $dresult = pg_query_params($conn, $dquery, [$employee["department_id"]]);
