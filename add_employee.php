@@ -9,14 +9,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
-<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center;">    <?php include "./templates/header.php";
+<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center;">
+
+    <?php
+    include "./templates/header.php";
     if (!isset($_SESSION["user_type_id"]) || $_SESSION["user_type_id"] == 0) {
         header("location: login.php");
         exit();
     }
 
     $error = '';
-    $fullname = $email = $phone = $dob = $salary = $position_id = $department_id = $emp_details = $skills = '';
+    $fullname = $email = $phone = $dob = $salary = $position_id = $department_id = $emp_details = $skills = $password = $retype_password = '';
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $fullname = pg_escape_string($_POST['fullname']);
@@ -28,7 +31,13 @@
         $department_id = (int)$_POST['department'];
         $emp_details = pg_escape_string($_POST['emp_details']);
         $skills = pg_escape_string($_POST['skills']);
+        $password = $_POST['password'];
+        $retype_password = $_POST['retype_password'];
         $status = 'f';
+
+        if ($password !== $retype_password) {
+            $error = "Passwords do not match.";
+        }
 
         if (empty($error)) {
             $hashed_password = password_hash($password, PASSWORD_BCRYPT);
@@ -37,58 +46,43 @@
             if (!empty($_FILES["profile_img"]["name"])) {
                 $target_dir = "uploads/";
                 $target_file = $target_dir . basename($_FILES["profile_img"]["name"]);
-                move_uploaded_file($_FILES["profile_img"]["tmp_name"], $target_file);
-                $profile_image = pg_escape_string($target_file);
+                if (move_uploaded_file($_FILES["profile_img"]["tmp_name"], $target_file)) {
+                    $profile_image = pg_escape_string($target_file);
+                } else {
+                    $error = "Failed to upload profile image.";
+                }
             }
 
-            $insert_employee_query = "
-            INSERT INTO employees (
-            user_type_id, department_id, position_id, employee_name, employee_email, employee_phone, salary, profile_image, employee_details, employee_skils, dob, status
-        ) 
-        VALUES (
-            0,
-            $department_id,
-            $position_id,
-            '$fullname', 
-            '$email', 
-            '$phone', 
-            $salary, 
-            '$profile_image', 
-            '$emp_details', 
-            '$skills', 
-            '$dob', 
-            'f'
-        ) RETURNING employee_id;";
+            if (empty($error)) {
+                $insert_employee_query = "
+                INSERT INTO employees (
+                    user_type_id, department_id, position_id, employee_name, employee_email, employee_phone, salary, profile_image, employee_details, employee_skils, dob, status
+                ) VALUES (
+                    0, $department_id, $position_id, '$fullname', '$email', '$phone', $salary, '$profile_image', '$emp_details', '$skills', '$dob', 'f'
+                ) RETURNING employee_id;";
 
-            $insert_employee = pg_query($conn, $insert_employee_query);
+                $insert_employee = pg_query($conn, $insert_employee_query);
 
-            if ($insert_employee) {
-                $employee_id = pg_fetch_result($insert_employee, 0, 'employee_id');
+                if ($insert_employee) {
+                    $employee_id = pg_fetch_result($insert_employee, 0, 'employee_id');
+                    $insert_user_query = "
+                    INSERT INTO users (
+                        employee_id, user_type_id, full_name, username, password, status
+                    ) VALUES (
+                        $employee_id, 1, '$fullname', '$email', '$hashed_password', 'f'
+                    );";
 
-                $insert_user_query =
-                    "INSERT INTO users (
-                    employee_id, user_type_id, full_name, username, status
-                ) 
-                VALUES (
-                    $employee_id,
-                    1,
-                    '$fullname', 
-                    '$email', 
-                    'f'
-                );";
+                    $insert_user = pg_query($conn, $insert_user_query);
 
-
-                $insert_user = pg_query($conn, $insert_user_query);
-
-                if ($insert_user) {
-                    echo "<script>alert('Registration successful!'); window.location.href='login.php';</script>";
-                    header("location: verification-pending.php");
-                    exit;
+                    if ($insert_user) {
+                        echo "<script>alert('Registration successful!'); window.location.href='dashboard.php';</script>";
+                        exit;
+                    } else {
+                        $error = "User registration failed.";
+                    }
                 } else {
-                    $error = "User registration failed.";
+                    $error = "Employee registration failed.";
                 }
-            } else {
-                $error = "Employee registration failed.";
             }
         }
     }
@@ -97,6 +91,7 @@
         echo "<script>alert('$error'); window.location.href='register.php';</script>";
     }
     ?>
+
 
     <!-- Main Content -->
     <div class="container flex-grow-1 py-5">
@@ -224,7 +219,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-info-circle"></i>
                                             </span>
-                                            <textarea class="form-control" id="emp_details" name="emp_details" rows="2" placeholder="Write about employee in short"></textarea>
+                                            <textarea class="form-control" id="emp_details" name="emp_details" rows="2" placeholder="Write about employee in short" required></textarea>
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -233,7 +228,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-tools"></i>
                                             </span>
-                                            <textarea class="form-control" id="skills" name="skills" rows="2" placeholder="Skills separated by comma"></textarea>
+                                            <textarea class="form-control" id="skills" name="skills" rows="2" placeholder="Skills separated by comma" required></textarea>
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -242,16 +237,16 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-lock"></i>
                                             </span>
-                                            <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="retype_password" class="form-label">Password</label>
+                                        <label for="retype_password" class="form-label">Retype Password</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-lock"></i>
                                             </span>
-                                            <input type="password" class="form-control" id="retype_password" name="retype_password" placeholder="Retype password">
+                                            <input type="password" class="form-control" id="retype_password" name="retype_password" placeholder="Retype password" required>
                                         </div>
                                     </div>
                                 </div>
