@@ -46,7 +46,7 @@
                     <table class="table table-hover table-bordered table-striped">
                         <thead class="table-primary">
                             <tr>
-                                <th><input type="checkbox" id="selectAll"></th>
+                                <th><input type="checkbox" id="selectAll" style="cursor: pointer;"></th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Phone</th>
@@ -62,7 +62,7 @@
                         <tbody>
                             <?php while ($row = pg_fetch_assoc($result)) { ?>
                                 <tr>
-                                    <td><input type="checkbox" class="userCheckbox" value="<?= $row['employee_id']; ?>"></td>
+                                    <td><input type="checkbox" class="userCheckbox" value="<?= $row['employee_id']; ?>" style="cursor: pointer;"></td>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <img src="<?= $row['profile_image'] ?: 'https://ui-avatars.com/api/?name=' . urlencode($row['employee_name']); ?>"
