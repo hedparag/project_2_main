@@ -11,12 +11,123 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
-<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center;">    <!-- Navbar -->
+<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center;"> <!-- Navbar -->
     <?php include "./templates/header.php";
     if (!isset($_SESSION["user_type_id"]) || $_SESSION["user_type_id"] == 0) {
         header("location: login.php");
         exit();
     }
+
+    // Get employee ID from URL parameter
+    if (!isset($_GET['id']) || empty($_GET['id'])) {
+        die("Invalid Employee ID");
+    }
+
+    $employee_id = (int)$_GET['id'];
+
+    // Fetch employee data
+    $query = "SELECT * FROM employees WHERE employee_id=$1";
+    $result = pg_query_params($conn, $query, [$employee_id]);
+
+    if (!$result || pg_num_rows($result) == 0) {
+        die("Employee not found.");
+    }
+
+    $employee = pg_fetch_assoc($result);
+
+    $error = "";
+
+    // Handle form submission
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $fullname = pg_escape_string($_POST['fullname']);
+        $email = pg_escape_string($_POST['email']);
+        $phone = pg_escape_string($_POST['phone']);
+        $dob = pg_escape_string($_POST['dob']);
+        $salary = (float)$_POST['salary'];
+        $position_id = (int)$_POST['position'];
+        $department_id = (int)$_POST['department'];
+        $emp_details = pg_escape_string($_POST['emp_details']);
+        $skills = pg_escape_string($_POST['skills']);
+        $password = $_POST['new_password'];
+        $hashed_password = !empty($password) ? password_hash($password, PASSWORD_BCRYPT) : null;
+
+        // Profile Image Upload
+        $profile_image = null;
+        if (!empty($_FILES["profile_img"]["name"])) {
+            $target_dir = "uploads/";
+            $target_file = $target_dir . basename($_FILES["profile_img"]["name"]);
+            if (move_uploaded_file($_FILES["profile_img"]["tmp_name"], $target_file)) {
+                $profile_image = pg_escape_string($target_file);
+            } else {
+                $error = "Failed to upload profile image.";
+            }
+        }
+
+        if (empty($error)) {
+            if (!$password) {
+                $update_query = "
+                UPDATE employees SET 
+                    department_id = $department_id,
+                    position_id = $position_id,
+                    employee_name = '$fullname',
+                    employee_email = '$email',
+                    employee_phone = '$phone',
+                    salary = $salary,
+                    employee_details = '$emp_details',
+                    employee_skils = '$skills',
+                    dob = '$dob'
+                    " . (!empty($profile_image) ? ", profile_image = '$profile_image'" : "") . "
+                WHERE employee_id = $employee_id";
+            } else {
+                $update_query = "
+                UPDATE employees SET 
+                    department_id = $department_id,
+                    position_id = $position_id,
+                    employee_name = '$fullname',
+                    employee_email = '$email',
+                    employee_phone = '$phone',
+                    salary = $salary,
+                    status='t',
+                    employee_details = '$emp_details',
+                    employee_skils = '$skills',
+                    dob = '$dob'
+                    " . (!empty($profile_image) ? ", profile_image = '$profile_image'" : "") . "
+                WHERE employee_id = $employee_id";
+            }
+
+            $update_employee = pg_query($conn, $update_query);
+
+            if ($update_employee) {
+                // Update user credentials if needed
+                if (!empty($password)) {
+                    $update_user_query = "
+                UPDATE users SET 
+                    full_name = '$fullname',
+                    username = '$email',
+                    password = '$hashed_password'
+                WHERE employee_id = $employee_id";
+                } else {
+                    $update_user_query = "
+                UPDATE users SET 
+                    full_name = '$fullname',
+                    username = '$email'
+                WHERE employee_id = $employee_id";
+                }
+
+                $update_user = pg_query($conn, $update_user_query);
+
+                if ($update_user) {
+                    echo "<script>alert('Update successful!'); window.location.href='dashboard.php';</script>";
+                    exit;
+                } else {
+                    $error = "User update failed.";
+                }
+            } else {
+                $error = "Employee update failed.";
+            }
+        }
+    }
+
     ?>
 
     <!-- Main Content -->
@@ -37,7 +148,7 @@
                             </div>
                         </div>
 
-                        <form action="update_employee.php" method="POST" enctype="multipart/form-data">
+                        <form action="" method="POST" enctype="multipart/form-data">
                             <div class="row g-4">
                                 <!-- Left Column -->
                                 <div class="col-md-6">
@@ -47,7 +158,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-user"></i>
                                             </span>
-                                            <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Full Name" required>
+                                            <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Full Name" value="<?php echo $employee['employee_name']; ?>">
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -56,7 +167,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-envelope"></i>
                                             </span>
-                                            <input type="email" class="form-control" id="email" name="email" placeholder="E-Mail" required>
+                                            <input type="email" class="form-control" id="email" name="email" placeholder="E-Mail" value="<?php echo $employee['employee_email']; ?>">
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -65,7 +176,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-phone"></i>
                                             </span>
-                                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="Mobile Number" required>
+                                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="Mobile Number" value="<?php echo $employee['employee_phone']; ?>">
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -74,7 +185,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-calendar"></i>
                                             </span>
-                                            <input type="date" class="form-control" id="dob" name="dob" required>
+                                            <input type="date" class="form-control" id="dob" name="dob" value="<?php echo $employee['dob']; ?>">
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -83,13 +194,14 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-dollar-sign"></i>
                                             </span>
-                                            <input type="text" class="form-control" id="salary" name="salary" placeholder="Salary per annum" required>
+                                            <input type="text" class="form-control" id="salary" name="salary" placeholder="Salary per annum" value="<?php echo $employee['salary']; ?>">
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label d-block">Current Profile Picture</label>
                                         <div class="d-flex align-items-center">
-                                            <img src="https://ui-avatars.com/api/?name=John+Doe" class="rounded-circle me-3" width="64" height="64">
+                                            <img src="<?= $employee['profile_image'] ?: 'https://ui-avatars.com/api/?name=' . urlencode($employee['employee_name']); ?>"
+                                                class="rounded-circle me-2" width="64" height="64">
                                             <div class="flex-grow-1">
                                                 <label for="profile_img" class="form-label mb-0 text-primary" style="cursor: pointer;">
                                                     <i class="fas fa-camera me-1"></i>Change Photo
@@ -109,17 +221,16 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-briefcase"></i>
                                             </span>
-                                            <select class="form-select" id="position" name="position" required>
-                                                <option value="" disabled selected>Select Position</option>
-                                                <option value="Director">Director</option>
-                                                <option value="Manager">Manager</option>
-                                                <option value="Team Leader">Team Leader</option>
-                                                <option value="Senior Specialist">Senior Specialist</option>
-                                                <option value="Specialist">Specialist</option>
-                                                <option value="Associate">Associate</option>
-                                                <option value="Analyst">Analyst</option>
-                                                <option value="Coordinator">Coordinator</option>
-                                                <option value="Intern">Intern</option>
+                                            <select class="form-select" id="position" name="position">
+                                                <?php
+                                                $query1 = "SELECT * FROM positions WHERE status = 't'";
+                                                $presult = pg_query($conn, $query1);
+
+                                                while ($pdata = pg_fetch_assoc($presult)) {
+                                                    $selected = ($pdata['position_id'] == $employee['position_id']) ? "selected" : "";
+                                                    echo "<option value='{$pdata['position_id']}' $selected>{$pdata['position_name']}</option>";
+                                                }
+                                                ?>
                                             </select>
                                         </div>
                                     </div>
@@ -129,9 +240,18 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-building"></i>
                                             </span>
-                                            <select class="form-select" id="department" name="department" required>
-                                                <option value="">-- Select Department --</option>
+                                            <select class="form-select" id="department" name="department">
+                                                <?php
+                                                $query1 = "SELECT * FROM departments WHERE status = 't'";
+                                                $dresult = pg_query($conn, $query1);
+
+                                                while ($ddata = pg_fetch_assoc($dresult)) {
+                                                    $selected = ($ddata['department_id'] == $employee['department_id']) ? "selected" : "";
+                                                    echo "<option value='{$ddata['department_id']}' $selected>{$ddata['department_name']}</option>";
+                                                }
+                                                ?>
                                             </select>
+
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -140,7 +260,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-info-circle"></i>
                                             </span>
-                                            <textarea class="form-control" id="emp_details" name="emp_details" rows="3" placeholder="Write about employee in short"></textarea>
+                                            <textarea class="form-control" id="emp_details" name="emp_details" rows="3" placeholder="Write about employee in short"><?php echo $employee['employee_details']; ?></textarea>
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -149,7 +269,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-tools"></i>
                                             </span>
-                                            <textarea class="form-control" id="skills" name="skills" rows="3" placeholder="Skills separated by comma"></textarea>
+                                            <textarea class="form-control" id="skills" name="skills" rows="3" placeholder="Skills separated by comma"><?php echo $employee['employee_skils']; ?></textarea>
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -171,7 +291,7 @@
                                             <i class="fas fa-times me-1"></i>Cancel
                                         </button>
                                         <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-save me-1"></i>Save Changes
+                                            <i class="fas fa-save me-1"></i>Update
                                         </button>
                                     </div>
                                 </div>

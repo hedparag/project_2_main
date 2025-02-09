@@ -93,7 +93,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="profile.php?id=<?= $row['employee_id']; ?>" class="btn btn-sm btn-outline-info bg-white">
+                                        <a href="edit_employee.php?id=<?= $row['employee_id']; ?>" class="btn btn-sm btn-outline-info bg-white">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
                                     </td>
