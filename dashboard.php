@@ -55,8 +55,8 @@
                                 <th>Skills</th>
                                 <th>Details</th>
                                 <th>Status</th>
-                                <th>Profile</th>
-                                <th>Toggle Status</th>
+                                <th>Edit</th>
+                                <th>Approve/Reject</th>
                             </tr>
                         </thead>
                         <tbody>
