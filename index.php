@@ -28,8 +28,7 @@
                 <div class="card border-0 bg-primary text-white shadow-sm">
                     <div class="card-body p-5">
                         <div class="d-flex align-items-center">
-                            <img src="<?= $_SESSION['profile_image'] ?: 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION["employee_name"]); ?>"
-                                class="rounded-circle me-2" width="128" height="128">
+                            <img src="<?= $_SESSION['profile_image'] ?: 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION["employee_name"]); ?>" class="rounded-circle me-2" width="128" height="128">
                             <div>
                                 <h1 class="display-6 mb-1">Welcome back, <?php echo $_SESSION["employee_name"]; ?>!</h1>
                                 <p class="lead mb-0"> <?php echo $_SESSION["department_name"] . " • " . $_SESSION["position_name"]; ?></p>

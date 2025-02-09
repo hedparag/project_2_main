@@ -204,7 +204,7 @@
                                         <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus me-1"></i> Register</button>
                                     </div>
                                     <p class="text-center mt-3 mb-0">
-                                        Already have an account? <a href="index.html" class="text-decoration-none">Login here</a>
+                                        Already have an account? <a href="login.php" class="text-decoration-none">Login here</a>
                                     </p>
                                 </div>
                             </div>

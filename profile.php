@@ -11,37 +11,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
-<body class="d-flex flex-column min-vh-100 bg-light">
+<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center;">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold fs-4" href="#">
-                <i class="fas fa-users-cog me-2"></i>EMS
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="dashboard.html">
-                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="profile.html">
-                            <i class="fas fa-user me-1"></i>Profile
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">
-                            <i class="fas fa-sign-out-alt me-1"></i>Logout
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <?php
+    include './templates/header.php';
+
+    if (!isset($_SESSION["user_type_id"])) {
+        header("location: login.php");
+        exit();
+    }
+    $employee_id = $_SESSION['employee_id'];
+
+    $query = "SELECT * FROM employees WHERE employee_id=$1";
+    $result = pg_query_params($conn, $query, [$employee_id]);
+
+    if (!$result || pg_num_rows($result) == 0) {
+        die("Employee not found.");
+    }
+
+    $employee = pg_fetch_assoc($result);
+    ?>
 
     <!-- Main Content -->
     <div class="container flex-grow-1 py-5">
@@ -53,7 +42,7 @@
                         <div class="row align-items-center">
                             <div class="col-auto">
                                 <div class="position-relative">
-                                    <img src="https://ui-avatars.com/api/?name=John+Doe&size=128" class="rounded-circle" width="120" height="120">
+                                    <img src="<?= $_SESSION['profile_image'] ?: 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION["employee_name"]); ?>" class="rounded-circle me-2" width="128" height="128">
                                     <label for="profile_img" class="position-absolute bottom-0 end-0 bg-white rounded-circle p-2 shadow-sm" style="cursor: pointer;">
                                         <i class="fas fa-camera text-primary"></i>
                                         <input type="file" id="profile_img" class="d-none">
@@ -61,11 +50,13 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <h2 class="mb-1">John Doe</h2>
-                                <p class="text-muted mb-2">Senior Developer</p>
+                                <h2 class="mb-1"><?php echo $employee['employee_name'] ?></h2>
+                                <p class="text-muted mb-2"><?php echo "Senior Developer"; ?></p>
                                 <div class="d-flex gap-2">
                                     <span class="badge bg-primary">Full-time</span>
-                                    <span class="badge bg-success">Active</span>
+                                    <?php if ($employee['status']) { ?>
+                                        <span class="badge bg-success">Active</span><?php } else { ?>
+                                        <span class="badge bg-danger">Inactive</span><?php } ?>
                                 </div>
                             </div>
                         </div>
@@ -97,7 +88,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-user"></i>
                                             </span>
-                                            <input type="text" class="form-control" id="fullname" value="John Doe" required>
+                                            <input type="text" class="form-control" id="fullname" value="<?php echo $employee['employee_name'] ?>" required>
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -106,7 +97,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-envelope"></i>
                                             </span>
-                                            <input type="email" class="form-control" id="email" value="john@example.com" required>
+                                            <input type="email" class="form-control" id="email" value="<?php echo $employee['employee_email'] ?>" required>
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -115,7 +106,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-phone"></i>
                                             </span>
-                                            <input type="tel" class="form-control" id="phone" value="+1234567890" required>
+                                            <input type="tel" class="form-control" id="phone" value="<?php echo $employee['employee_phone'] ?>" required>
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -124,7 +115,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-calendar"></i>
                                             </span>
-                                            <input type="date" class="form-control" id="dob" required>
+                                            <input type="date" class="form-control" id="dob" value="<?php echo $employee['dob'] ?>">
                                         </div>
                                     </div>
                                 </div>
@@ -166,7 +157,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-dollar-sign"></i>
                                             </span>
-                                            <input type="text" class="form-control" id="salary" value="75000" required>
+                                            <input type="text" class="form-control" id="salary" value="<?php echo $employee['salary'] ?>" required>
                                         </div>
                                     </div>
                                 </div>
@@ -177,7 +168,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-info-circle"></i>
                                             </span>
-                                            <textarea class="form-control" id="emp_details" rows="3">Experienced developer with a passion for creating efficient solutions.</textarea>
+                                            <textarea class="form-control" id="emp_details" rows="3"><?php echo $employee['employee_details'] ?></textarea>
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -186,7 +177,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-tools"></i>
                                             </span>
-                                            <textarea class="form-control" id="skills" rows="3">JavaScript, Python, React, Node.js, SQL, Git</textarea>
+                                            <textarea class="form-control" id="skills" rows="3"><?php echo $employee['employee_skils'] ?></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -269,33 +260,9 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-white py-4 border-top">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-4 text-lg-start text-center mb-3 mb-lg-0">
-                    <span class="text-muted">
-                        <i class="fas fa-users-cog me-2"></i>EMS &copy; 2024
-                    </span>
-                </div>
-                <div class="col-lg-4 text-center mb-3 mb-lg-0">
-                    <a href="#!" class="text-decoration-none text-muted me-3">Privacy Policy</a>
-                    <a href="#!" class="text-decoration-none text-muted">Terms of Use</a>
-                </div>
-                <div class="col-lg-4 text-lg-end text-center">
-                    <a href="#!" class="text-decoration-none text-muted me-3">
-                        <i class="fab fa-linkedin fa-lg"></i>
-                    </a>
-                    <a href="#!" class="text-decoration-none text-muted me-3">
-                        <i class="fab fa-twitter fa-lg"></i>
-                    </a>
-                    <a href="#!" class="text-decoration-none text-muted">
-                        <i class="fab fa-facebook-f fa-lg"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <?php
+    include './templates/footer.php';
+    ?>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

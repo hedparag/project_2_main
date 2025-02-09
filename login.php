@@ -36,6 +36,7 @@
                 if ($eresult && pg_num_rows($eresult) > 0) {
                     $employee = pg_fetch_assoc($eresult);
                     $_SESSION["employee_name"] = $employee["employee_name"];
+                    $_SESSION["employee_id"] = $employee["employee_id"];
                     $_SESSION["user_type_id"] = $employee["user_type_id"];
                     $_SESSION["employee_email"] = $employee["employee_email"];
                     $_SESSION["profile_image"] = $employee["profile_image"];
