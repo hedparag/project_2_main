@@ -6,7 +6,7 @@
     <title>Edit Employee | EMS</title>
 </head>
 
-<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center;"> <!-- Navbar -->
+<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center; font-family:poppins;"> <!-- Navbar -->
     <?php include "./templates/header.php";
     if (!isset($_SESSION["user_type_id"]) || $_SESSION["user_type_id"] == 0) {
         header("location: login.php");
@@ -187,7 +187,7 @@
                                         <label for="salary" class="form-label">Salary</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light">
-                                                <i class="fas fa-dollar-sign"></i>
+                                                <i class="fa-solid fa-indian-rupee-sign"></i>
                                             </span>
                                             <input type="text" class="form-control" id="salary" name="salary" placeholder="Salary per annum" value="<?php echo $employee['salary']; ?>">
                                         </div>

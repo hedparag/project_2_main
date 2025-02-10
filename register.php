@@ -6,7 +6,9 @@
     <title>Register | EMS</title>
 </head>
 
-<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center;"> <?php include "./templates/header.php"; ?>
+<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center; font-family:poppins; ">
+
+    <?php include "./templates/header.php"; ?>
     <?php include "./include/config.php";
     if (isset($_SESSION["user_type_id"])) {
         header("location: index.php");
@@ -138,7 +140,7 @@
                                     <div class="mb-3">
                                         <label for="salary" class="form-label">Salary</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light"><i class="fas fa-dollar-sign"></i></span>
+                                            <span class="input-group-text bg-light"><i class="fa-solid fa-indian-rupee-sign"></i></span>
                                             <input type="number" class="form-control" id="salary" name="salary" placeholder="Enter your salary in INR" required>
                                         </div>
                                     </div>
