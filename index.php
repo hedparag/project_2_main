@@ -2,20 +2,17 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Management System - Home</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <?php include './templates/meta-info.php'; ?>
+    <title>Home | EMS</title>
 </head>
 
-<body class="d-flex flex-column min-vh-100 bg-light">
+<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center; font-family:poppins;;">
     <?php
     include "./templates/header.php";
-    echo $navbarUserScr;
-
+    if (!isset($_SESSION["user_type_id"])) {
+        header("location: login.php");
+        exit();
+    }
     ?>
 
     <!-- Main Content -->
@@ -26,10 +23,10 @@
                 <div class="card border-0 bg-primary text-white shadow-sm">
                     <div class="card-body p-5">
                         <div class="d-flex align-items-center">
-                            <img src="https://ui-avatars.com/api/?name=John+Doe&size=128" class="rounded-circle me-4" width="100">
+                            <img src="<?= $_SESSION['profile_image'] ?: 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION["employee_name"]); ?>" class="rounded-circle me-2" width="128" height="128">
                             <div>
-                                <h1 class="display-6 mb-1">Welcome back, John Doe!</h1>
-                                <p class="lead mb-0">Senior Developer • IT Department</p>
+                                <h1 class="display-6 mb-1">Welcome back, <?php echo $_SESSION["employee_name"]; ?>!</h1>
+                                <p class="lead mb-0"> <?php echo $_SESSION["department_name"] . " • " . $_SESSION["position_name"]; ?></p>
                             </div>
                         </div>
                     </div>
@@ -109,7 +106,7 @@
                         <h5 class="card-title mb-4">Quick Actions</h5>
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <a href="profile.html" class="btn btn-light border w-100 p-4 text-start">
+                                <a href="profile.php" class="btn btn-light border w-100 p-4 text-start">
                                     <i class="fas fa-user-edit fa-2x mb-3 text-primary"></i>
                                     <h6 class="mb-1">Update Profile</h6>
                                     <small class="text-muted">Edit your personal information</small>
