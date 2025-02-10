@@ -14,8 +14,21 @@
         header("location: index.php");
         exit();
     }
+    // one-time token added for csrf
+    if (!isset($_SESSION['token'])) {
+        $_SESSION['token'] = md5(uniqid(mt_rand(), true));
+    }
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+        if (!isset($_POST['token']) || !hash_equals($_SESSION['token'], $_POST['token'])) {
+            // Invalid CSRF token - return 403 Forbidden
+            header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
+            exit('Invalid CSRF token');
+        }
+
+        // Process the form after CSRF validation
+
         $email = trim($_POST['email']);
         $password = $_POST['password'];
 
@@ -83,6 +96,9 @@
                                     <span class="input-group-text">
                                         <i class="fas fa-envelope"></i>
                                     </span>
+                                    <!-- created a hidden input field for csrf -->
+                                    <input type="hidden" name="token" value="<?php echo $_SESSION['token'] ?? '' ?>">
+
                                     <input type="email" class="form-control" id="email" name="email" required>
                                 </div>
                             </div>
