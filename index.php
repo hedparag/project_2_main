@@ -13,6 +13,14 @@
         header("location: login.php");
         exit();
     }
+
+    $query = 'SELECT COUNT(*) AS total_employees FROM employees;';
+    $result = pg_query($conn, $query);
+    $total_employee = pg_fetch_assoc($result);
+
+    $dquery = 'SELECT COUNT(*) AS total_departments FROM departments;';
+    $dresult = pg_query($conn, $dquery);
+    $total_departments = pg_fetch_assoc($dresult);
     ?>
 
     <!-- Main Content -->
@@ -45,7 +53,7 @@
                             </div>
                             <div class="ms-3">
                                 <h6 class="card-title mb-1">Total Employees</h6>
-                                <h3 class="mb-0">150</h3>
+                                <h3 class="mb-0"><?php echo $total_employee['total_employees']; ?></h3>
                             </div>
                         </div>
                     </div>
@@ -60,7 +68,7 @@
                             </div>
                             <div class="ms-3">
                                 <h6 class="card-title mb-1">Departments</h6>
-                                <h3 class="mb-0">8</h3>
+                                <h3 class="mb-0"><?php echo $total_departments['total_departments']; ?></h3>
                             </div>
                         </div>
                     </div>
