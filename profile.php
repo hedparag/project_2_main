@@ -326,7 +326,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-lock"></i>
                                             </span>
-                                            <input type="password" class="form-control" id="current-password" required>
+                                            <input type="password" class="form-control" name="current-password" id="current-password" required>
                                         </div>
                                     </div>
                                 </div>
@@ -337,7 +337,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-key"></i>
                                             </span>
-                                            <input type="password" class="form-control" id="new-password" required>
+                                            <input type="password" class="form-control" name="new-password" id="new-password" required>
                                         </div>
                                     </div>
                                 </div>
@@ -348,7 +348,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-check-double"></i>
                                             </span>
-                                            <input type="password" class="form-control" id="confirm-password" required>
+                                            <input type="password" name="confirm-password" class="form-control" id="confirm-password" required>
                                         </div>
                                     </div>
                                 </div>

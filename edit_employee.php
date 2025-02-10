@@ -6,21 +6,19 @@
     <title>Edit Employee | EMS</title>
 </head>
 
-<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center; font-family:poppins;"> <!-- Navbar -->
+<body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center; font-family:poppins;">
     <?php include "./templates/header.php";
     if (!isset($_SESSION["user_type_id"]) || $_SESSION["user_type_id"] == 0) {
         header("location: login.php");
         exit();
     }
 
-    // Get employee ID from URL parameter
     if (!isset($_GET['id']) || empty($_GET['id'])) {
         die("Invalid Employee ID");
     }
 
     $employee_id = (int)$_GET['id'];
 
-    // Fetch employee data
     $query = "SELECT * FROM employees WHERE employee_id=$1";
     $result = pg_query_params($conn, $query, [$employee_id]);
 
@@ -32,7 +30,6 @@
 
     $error = "";
 
-    // Handle form submission
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $fullname = pg_escape_string($_POST['fullname']);
         $email = pg_escape_string($_POST['email']);
@@ -46,7 +43,6 @@
         $password = $_POST['new_password'];
         $hashed_password = !empty($password) ? password_hash($password, PASSWORD_BCRYPT) : null;
 
-        // Profile Image Upload
         $profile_image = null;
         if (!empty($_FILES["profile_img"]["name"])) {
             $target_dir = "uploads/";
@@ -93,7 +89,6 @@
             $update_employee = pg_query($conn, $update_query);
 
             if ($update_employee) {
-                // Update user credentials if needed
                 if (!empty($password)) {
                     $update_user_query = "
                 UPDATE users SET 
