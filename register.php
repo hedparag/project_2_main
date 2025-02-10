@@ -70,7 +70,7 @@
                 ) 
                 VALUES (
                     $employee_id,
-                    1,
+                    0,
                     '$fullname', 
                     '$email', 
                     'f'

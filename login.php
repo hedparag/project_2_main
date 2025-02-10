@@ -14,8 +14,21 @@
         header("location: index.php");
         exit();
     }
+    // one-time token added for csrf
+    if (!isset($_SESSION['token'])) {
+        $_SESSION['token'] = md5(uniqid(mt_rand(), true));
+    }
 
+    $email = "";
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+        if (!isset($_POST['token']) || !hash_equals($_SESSION['token'], $_POST['token'])) {
+            // Invalid CSRF token - return 403 Forbidden
+            header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
+            exit('Invalid CSRF token');
+        }
+
+        // Process the form after CSRF validation
         $email = trim($_POST['email']);
         $password = $_POST['password'];
 
@@ -56,17 +69,15 @@
                     header("Location: index.php");
                     exit();
                 } else {
-                    echo "<script>alert('❌ Employee details not found!')</script>";
+                    $login_error = '❌ Employee details not found!';
                 }
             } else {
-                echo "<script>alert('❌ Incorrect password!')</script>";
+                $login_error = '❌ Incorrect password!';
             }
         } else {
-            echo "<script>alert('❌ User not found!')</script>";
+            $login_error = '❌ User not found!';
         }
     }
-
-
     ?>
 
     <!-- Main Content -->
@@ -83,7 +94,14 @@
                                     <span class="input-group-text">
                                         <i class="fas fa-envelope"></i>
                                     </span>
-                                    <input type="email" class="form-control" id="email" name="email" required>
+                                    <!-- created a hidden input field for csrf -->
+                                    <input type="hidden" name="token" value="<?php echo $_SESSION['token'] ?? '' ?>">
+
+                                    <?php
+                                    if (!$email) {  ?>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    <?php } else { ?>
+                                        <input type="email" class="form-control" id="email" name="email" required value="<?php echo $email; ?>"> <?php } ?>
                                 </div>
                             </div>
                             <div class="mb-4">
@@ -95,6 +113,12 @@
                                     <input type="password" class="form-control" id="password" name="password" required>
                                 </div>
                             </div>
+                            <?php
+                            if (isset($login_error)) { ?>
+                                <span style="display: block;"><?php echo $login_error; ?></span><br>
+                            <?php } else { ?>
+                                <span style="display: none;"><?php echo $login_error; ?></span><br>
+                            <?php } ?>
                             <button type="submit" class="btn btn-primary w-100 mb-3">
                                 Sign In
                             </button>

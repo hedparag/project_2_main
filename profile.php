@@ -7,6 +7,7 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100" style="background-image: url('https://img.freepik.com/free-vector/blue-pink-halftone-background_53876-99004.jpg'); background-size: cover; background-position: center; font-family: poppins;">
+
     <?php
     include './templates/header.php';
 
@@ -14,7 +15,11 @@
         header("location: login.php");
         exit();
     }
+
     $employee_id = $_SESSION['employee_id'];
+    // Pre-define $current_password from POST (using the same key as in your password form)
+    $current_password = $_POST['current-password'] ?? '';
+
     $query = "SELECT * FROM employees WHERE employee_id=$1";
     $result = pg_query_params($conn, $query, [$employee_id]);
 
@@ -24,101 +29,101 @@
 
     $employee = pg_fetch_assoc($result);
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $fullname = pg_escape_string($_POST['fullname']);
-        $email = pg_escape_string($_POST['email']);
-        $phone = pg_escape_string($_POST['phone']);
-        $dob = pg_escape_string($_POST['dob']);
-        $salary = (float)$_POST['salary'];
-        $position_id = (int)$_POST['position'];
-        $department_id = (int)$_POST['department'];
-        $emp_details = pg_escape_string($_POST['emp_details']);
-        $skills = pg_escape_string($_POST['skills']);
-        $password = $_POST['password'];
-        $retype_password = $_POST['retype_password'];
-        $status = 'f';
+    // Determine which form is being submitted based on the presence of current-password
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && !$current_password) {
+        // ----------- PROFILE UPDATE -----------
+        $fullname      = isset($_POST['fullname']) ? pg_escape_string($_POST['fullname']) : "";
+        $email         = isset($_POST['email']) ? pg_escape_string($_POST['email']) : "";
+        $phone         = isset($_POST['phone']) ? pg_escape_string($_POST['phone']) : "";
+        $dob           = isset($_POST['dob']) ? pg_escape_string($_POST['dob']) : "";
+        $salary        = isset($_POST['salary']) ? (float)$_POST['salary'] : 0.0;
+        $position_id   = isset($_POST['position']) ? (int)$_POST['position'] : 0;
+        $department_id = isset($_POST['department']) ? (int)$_POST['department'] : 0;
+        $emp_details   = isset($_POST['emp_details']) ? pg_escape_string($_POST['emp_details']) : "";
+        $skills        = isset($_POST['skills']) ? pg_escape_string($_POST['skills']) : "";
 
-        if ($password !== $retype_password) {
-            $error = "Passwords do not match.";
+        $profile_image = null;
+        if (!empty($_FILES["profile_img"]["name"])) {
+            $target_dir  = "uploads/";
+            $target_file = $target_dir . basename($_FILES["profile_img"]["name"]);
+            if (move_uploaded_file($_FILES["profile_img"]["tmp_name"], $target_file)) {
+                $profile_image = pg_escape_string($target_file);
+            } else {
+                $error = "Failed to upload profile image.";
+            }
         }
 
         if (empty($error)) {
-            $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+            // Build the employee update query
+            $update_query = "
+            UPDATE employees SET 
+                department_id = $department_id,
+                position_id = $position_id,
+                employee_name = '$fullname',
+                employee_email = '$email',
+                employee_phone = '$phone',
+                salary = $salary,
+                employee_details = '$emp_details',
+                employee_skils = '$skills',
+                dob = '$dob'
+                " . (!empty($profile_image) ? ", profile_image = '$profile_image'" : "") . "
+            WHERE employee_id = $employee_id";
 
-            $profile_image = null;
-            if (!empty($_FILES["profile_img"]["name"])) {
-                $target_dir = "uploads/";
-                $target_file = $target_dir . basename($_FILES["profile_img"]["name"]);
-                if (move_uploaded_file($_FILES["profile_img"]["tmp_name"], $target_file)) {
-                    $profile_image = pg_escape_string($target_file);
+            $update_employee = pg_query($conn, $update_query);
+
+            if ($update_employee) {
+                // Update the user info (excluding password change)
+                $update_user_query = "
+                UPDATE users SET 
+                    full_name = '$fullname',
+                    username = '$email'
+                WHERE employee_id = $employee_id";
+                $update_user = pg_query($conn, $update_user_query);
+
+                if ($update_user) {
+                    echo "<script>alert('Update successful!'); window.location.href='profile.php';</script>";
+                    exit;
                 } else {
-                    $error = "Failed to upload profile image.";
+                    $error = "User update failed.";
                 }
+            } else {
+                $error = "Employee update failed.";
             }
+        }
+    }
 
-            if (empty($error)) {
-                if (!$password) {
-                    $update_query = "
-                    UPDATE employees SET 
-                        department_id = $department_id,
-                        position_id = $position_id,
-                        employee_name = '$fullname',
-                        employee_email = '$email',
-                        employee_phone = '$phone',
-                        salary = $salary,
-                        employee_details = '$emp_details',
-                        employee_skils = '$skills',
-                        dob = '$dob'
-                        " . (!empty($profile_image) ? ", profile_image = '$profile_image'" : "") . "
-                    WHERE employee_id = $employee_id";
-                } else {
-                    $update_query = "
-                    UPDATE employees SET 
-                        department_id = $department_id,
-                        position_id = $position_id,
-                        employee_name = '$fullname',
-                        employee_email = '$email',
-                        employee_phone = '$phone',
-                        salary = $salary,
-                        status='t',
-                        employee_details = '$emp_details',
-                        employee_skils = '$skills',
-                        dob = '$dob'
-                        " . (!empty($profile_image) ? ", profile_image = '$profile_image'" : "") . "
-                    WHERE employee_id = $employee_id";
-                }
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && $current_password) {
+        // ----------- PASSWORD UPDATE -----------
+        $new_password     = $_POST['new-password'] ?? "";
+        $confirm_password = $_POST['confirm-password'] ?? "";
 
-                $update_employee = pg_query($conn, $update_query);
+        $uquery  = 'SELECT password FROM users WHERE employee_id=$1;';
+        $uresult = pg_query_params($conn, $uquery, [$employee_id]);
 
-                if ($update_employee) {
-                    // Update user credentials if needed
-                    if (!empty($password)) {
-                        $update_user_query = "
-                    UPDATE users SET 
-                        full_name = '$fullname',
-                        username = '$email',
-                        password = '$hashed_password'
-                    WHERE employee_id = $employee_id";
+        if ($uresult && pg_num_rows($uresult) > 0) {
+            $row = pg_fetch_assoc($uresult);
+            $hashed_password = $row['password'];
+
+            if (password_verify($current_password, $hashed_password)) {
+                if ($new_password === $confirm_password) {
+                    $new_hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+
+                    $update_query  = 'UPDATE users SET password=$1 WHERE employee_id=$2;';
+                    $update_result = pg_query_params($conn, $update_query, [$new_hashed_password, $employee_id]);
+
+                    if ($update_result) {
+                        echo "<script>alert('Password updated successfully'); window.location.href='profile.php';</script>";
                     } else {
-                        $update_user_query = "
-                    UPDATE users SET 
-                        full_name = '$fullname',
-                        username = '$email'
-                    WHERE employee_id = $employee_id";
-                    }
-
-                    $update_user = pg_query($conn, $update_user_query);
-
-                    if ($update_user) {
-                        echo "<script>alert('Update successful!'); window.location.href='dashboard.php';</script>";
-                        exit;
-                    } else {
-                        $error = "User update failed.";
+                        echo "<script>alert('Error updating password');</script>";
                     }
                 } else {
-                    $error = "Employee update failed.";
+                    echo "<script>alert('New password and confirm password do not match');</script>";
                 }
+            } else {
+                echo "<script>alert('Current password is incorrect');</script>";
             }
+        } else {
+            echo "<script>alert('User not found');</script>";
         }
     }
     ?>
@@ -214,7 +219,7 @@
                                             <span class="input-group-text bg-light">
                                                 <i class="fas fa-calendar"></i>
                                             </span>
-                                            <input type="date" class="form-control" id="dob" name="dob" value="<?php echo $employee['dob'] ?>">
+                                            <input type="date" class="form-control" id="dob" name="dob" value="<?php echo $employee['dob']; ?>">
                                         </div>
                                     </div>
                                 </div>
